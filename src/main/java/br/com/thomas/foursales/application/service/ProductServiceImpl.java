@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,33 @@ public class ProductServiceImpl implements ProductService {
                 .qtStock(request.getQtStock())
                 .createdAt(LocalDateTime.now())
                 .build());
+
+        return ProductResponse.builder()
+                .id(savedEntity.getId())
+                .name(savedEntity.getName())
+                .description(savedEntity.getDescription())
+                .price(savedEntity.getPrice())
+                .category(savedEntity.getCategory())
+                .qtStock(savedEntity.getQtStock())
+                .createdAt(savedEntity.getCreatedAt())
+                .updatedAt(savedEntity.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    public ProductResponse update(UUID id, ProductRequest request) {
+        //TODO: exception
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("nao encontrei"));
+
+        productEntity.setName(request.getName());
+        productEntity.setDescription(request.getDescription());
+        productEntity.setPrice(request.getPrice());
+        productEntity.setCategory(request.getCategory());
+        productEntity.setQtStock(request.getQtStock());
+        productEntity.setUpdatedAt(LocalDateTime.now());
+
+        ProductEntity savedEntity = productRepository.save(productEntity);
 
         return ProductResponse.builder()
                 .id(savedEntity.getId())
