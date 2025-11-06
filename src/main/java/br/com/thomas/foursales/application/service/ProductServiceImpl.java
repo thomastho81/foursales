@@ -67,4 +67,30 @@ public class ProductServiceImpl implements ProductService {
                 .updatedAt(savedEntity.getUpdatedAt())
                 .build();
     }
+
+    @Override
+    public void delete(UUID id) {
+        productRepository.findById(id)
+                .ifPresentOrElse(productRepository::delete,
+                () -> {
+                    throw new RuntimeException("nao achei");
+                });
+    }
+
+    @Override
+    public ProductResponse findById(UUID id) {
+        ProductEntity productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("nao achei"));
+
+        return ProductResponse.builder()
+                .id(productEntity.getId())
+                .name(productEntity.getName())
+                .description(productEntity.getDescription())
+                .price(productEntity.getPrice())
+                .category(productEntity.getCategory())
+                .qtStock(productEntity.getQtStock())
+                .createdAt(productEntity.getCreatedAt())
+                .updatedAt(productEntity.getUpdatedAt())
+                .build();
+    }
 }
