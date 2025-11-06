@@ -19,9 +19,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse create(ProductRequest request) {
 
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName(request.getName());
-
         ProductEntity savedEntity = productRepository.save(ProductEntity.builder()
                 .name(request.getName())
                 .description(request.getDescription())
