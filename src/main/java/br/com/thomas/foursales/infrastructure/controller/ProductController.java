@@ -5,6 +5,8 @@ import br.com.thomas.foursales.domain.response.ProductResponse;
 import br.com.thomas.foursales.infrastructure.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,6 +37,20 @@ public class ProductController {
         ProductResponse productResponse = productService.update(id, request);
 
         return ResponseEntity.ok(productResponse);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        productService.delete(id);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> findById(@PathVariable UUID id) {
+        ProductResponse product = productService.findById(id);
+
+        return ResponseEntity.ok(product);
     }
 
 }
