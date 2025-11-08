@@ -3,6 +3,7 @@ package br.com.thomas.foursales.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,7 @@ public class ProductEntity {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(generator = "UUID")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "NOME")
@@ -35,7 +36,7 @@ public class ProductEntity {
     @Column(name = "DESCRICAO")
     private String description;
 
-    @Column(name = "PRECO")
+    @Column(name = "PRECO", precision = 10, scale = 2)
     private BigDecimal price;
 
     @Column(name = "CATEGORIA")
