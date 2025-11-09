@@ -16,25 +16,25 @@ import lombok.Setter;
 @Setter
 @Builder
 @Entity
-@Table(name = "TB_USUARIO")
+@Table(name = "tb_usuario")
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEntity {
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "USERNAME")
-    private String username;
+    @Column(name = "username")
+    private String username; //todo: colocar constraint unique
 
-    @Column(name = "SENHA")
+    @Column(name = "senha")
     private String password;
 
-    @Column(name = "EMAIL")
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "ROLE")
+    @Column(name = "role")
     private String role; //todo: fazer role e enum
 }

@@ -1,6 +1,7 @@
 package br.com.thomas.foursales.domain.entity;
 
 import br.com.thomas.foursales.domain.enums.OrderStatusEnum;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,30 +28,39 @@ import java.util.List;
 @Setter
 @Builder
 @Entity
-@Table(name = "TB_PEDIDO")
+@Table(name = "tb_pedido")
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderEntity {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "ID_ITEM")
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemEntity> items = new ArrayList<>();
 
     @ManyToOne
-    @JoinColumn(name = "ID_USUARIO", nullable = false)
+    @JoinColumn(name = "id_usuario", nullable = false)
     private UserEntity user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS")
+    @Column(name = "status")
     private OrderStatusEnum status;
 
-    @Column(name = "VALOR_TOTAL")
+    @Column(name = "valor_total")
     private BigDecimal value;
 
-    @Column(name = "DT_CRIACAO")
+    @Column(name = "dt_criacao")
     private LocalDateTime createdAt;
+
+    @Column(name = "dt_atualizacao")
+    private LocalDateTime updatedAt;
+
+    public void calculateTotalValue() {
+        this.value = items.stream()
+                .map(OrderItemEntity::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

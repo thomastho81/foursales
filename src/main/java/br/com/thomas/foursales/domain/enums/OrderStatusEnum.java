@@ -7,7 +7,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum OrderStatusEnum {
 
-    PENDENTE(1, "PENDENTE");
+    PENDENTE(1, "PENDENTE"),
+    PAGO(2, "PAGO"),
+    CANCELADO(3, "CANCELADO");
 
     private final Integer id;
 

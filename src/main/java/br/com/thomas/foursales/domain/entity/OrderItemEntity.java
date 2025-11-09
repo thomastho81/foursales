@@ -20,28 +20,31 @@ import java.math.BigDecimal;
 @Setter
 @Builder
 @Entity
-@Table(name = "TB_ITEM_PEDIDO")
+@Table(name = "tb_item_pedido")
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderItemEntity {
 
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "ID_PEDIDO", nullable = false)
+    @JoinColumn(name = "id_pedido", nullable = false)
     private OrderEntity order;
 
     @ManyToOne
-    @JoinColumn(name = "ID_PRODUTO", nullable = false)
+    @JoinColumn(name = "id_produto", nullable = false)
     private ProductEntity product;
 
-    @Column(name = "QUANTIDADE")
+    @Column(name = "quantidade")
     private Integer quantity;
 
-    @Column(name = "SUBTOTAL", precision = 10, scale = 2)
+    @Column(name = "subtotal", precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    public void calculateSubtotal() {
+       this.subtotal = product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
 }
