@@ -2,8 +2,8 @@ package br.com.thomas.foursales.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,34 +19,45 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "TB_PRODUTO")
+@Table(name = "tb_produto")
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductEntity {
 
     @Id
-    @Column(name = "ID")
-    @GeneratedValue(generator = "UUID")
-    private UUID id;
+    @Column(name = "id", columnDefinition = "CHAR(36)")
+    private String id;
 
-    @Column(name = "NOME")
+    @Column(name = "nome")
     private String name;
 
-    @Column(name = "DESCRICAO")
+    @Column(name = "descricao")
     private String description;
 
-    @Column(name = "PRECO")
+    @Column(name = "preco", precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "CATEGORIA")
+    @Column(name = "categoria")
     private String category;
 
-    @Column(name = "QT_ESTOQUE")
-    private Long qtStock;
+    @Column(name = "qt_estoque")
+    private Integer qtStock;
 
-    @Column(name = "DT_CRIACAO")
+    @Column(name = "dt_criacao")
     private LocalDateTime createdAt;
 
-    @Column(name = "DT_ATUALIZACAO")
+    @Column(name = "dt_atualizacao")
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void generateId() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+    }
+
+    public boolean hasStockFor(int orderQuantity) {
+        return this.qtStock >= orderQuantity;
+    }
+
 }

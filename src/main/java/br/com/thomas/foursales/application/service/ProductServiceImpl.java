@@ -4,83 +4,55 @@ import br.com.thomas.foursales.domain.entity.ProductEntity;
 import br.com.thomas.foursales.domain.repository.ProductRepository;
 import br.com.thomas.foursales.domain.request.ProductRequest;
 import br.com.thomas.foursales.domain.response.ProductResponse;
+import br.com.thomas.foursales.infrastructure.exception.ResourceNotFoundException;
+import br.com.thomas.foursales.infrastructure.mapper.ProductConverter;
 import br.com.thomas.foursales.infrastructure.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
+    private static final String PRODUCT = "produto";
+
     private final ProductRepository productRepository;
+
+    private final ProductConverter productConverter;
 
     @Override
     public ProductResponse create(ProductRequest request) {
+        ProductEntity productEntity = productConverter.toEntity(request);
+        productEntity.setCreatedAt(LocalDateTime.now());
 
-        ProductEntity savedEntity = productRepository.save(ProductEntity.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .category(request.getCategory())
-                .qtStock(request.getQtStock())
-                .createdAt(LocalDateTime.now())
-                .build());
+        ProductEntity savedEntity = productRepository.save(productEntity);
 
-        return ProductResponse.builder()
-                .id(savedEntity.getId())
-                .name(savedEntity.getName())
-                .description(savedEntity.getDescription())
-                .price(savedEntity.getPrice())
-                .category(savedEntity.getCategory())
-                .qtStock(savedEntity.getQtStock())
-                .createdAt(savedEntity.getCreatedAt())
-                .updatedAt(savedEntity.getUpdatedAt())
-                .build();
+        return productConverter.toResponse(savedEntity);
     }
 
     @Override
-    public ProductResponse update(UUID id, ProductRequest request) {
-        //TODO: exception
-        ProductEntity productEntity = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("nao encontrei"));
+    public ProductResponse update(String id, ProductRequest request) {
+        ProductEntity productEntity = this.findByProductId(id);
 
-        productEntity.setName(request.getName());
-        productEntity.setDescription(request.getDescription());
-        productEntity.setPrice(request.getPrice());
-        productEntity.setCategory(request.getCategory());
-        productEntity.setQtStock(request.getQtStock());
+        productEntity = productConverter.merge(request, productEntity);
         productEntity.setUpdatedAt(LocalDateTime.now());
 
         ProductEntity savedEntity = productRepository.save(productEntity);
 
-        return ProductResponse.builder()
-                .id(savedEntity.getId())
-                .name(savedEntity.getName())
-                .description(savedEntity.getDescription())
-                .price(savedEntity.getPrice())
-                .category(savedEntity.getCategory())
-                .qtStock(savedEntity.getQtStock())
-                .createdAt(savedEntity.getCreatedAt())
-                .updatedAt(savedEntity.getUpdatedAt())
-                .build();
+        return productConverter.toResponse(savedEntity);
     }
 
     @Override
-    public void delete(UUID id) {
-        productRepository.findById(id)
-                .ifPresentOrElse(productRepository::delete,
-                () -> {
-                    throw new RuntimeException("nao achei");
-                });
+    public void delete(String id) {
+        productRepository.delete(this.findByProductId(id));
     }
 
     @Override
-    public ProductResponse findById(UUID id) {
-        ProductEntity productEntity = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("nao achei"));
+    public ProductResponse findById(String id) {
+        ProductEntity productEntity = this.findByProductId(id);
 
         return ProductResponse.builder()
                 .id(productEntity.getId())
@@ -92,5 +64,20 @@ public class ProductServiceImpl implements ProductService {
                 .createdAt(productEntity.getCreatedAt())
                 .updatedAt(productEntity.getUpdatedAt())
                 .build();
+    }
+
+    private ProductEntity findByProductId(String id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PRODUCT, id));
+    }
+
+    @Override
+    public List<ProductEntity> findAllById(List<String> ids) {
+        return productRepository.findAllById(ids);
+    }
+
+    @Override
+    public List<ProductEntity> saveAll(List<ProductEntity> products) {
+        return productRepository.saveAll(products);
     }
 }

@@ -4,6 +4,7 @@ import br.com.thomas.foursales.domain.request.ProductRequest;
 import br.com.thomas.foursales.domain.response.ProductResponse;
 import br.com.thomas.foursales.infrastructure.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/products")
@@ -23,31 +24,31 @@ public class ProductController {
 
     private final ProductService productService;
 
-    //TODO: logs, responseStatus decente; exception handler
+    //TODO: logs; pq validation notnull n ta funcionando
     @PostMapping("/")
-    public ResponseEntity<ProductResponse> create(@RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> create(@RequestBody @Valid ProductRequest request) {
 
         ProductResponse productResponse = productService.create(request);
 
-        return ResponseEntity.ok(productResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductResponse> update(@PathVariable UUID id, @RequestBody ProductRequest request) {
+    public ResponseEntity<ProductResponse> update(@PathVariable String id, @RequestBody ProductRequest request) {
         ProductResponse productResponse = productService.update(id, request);
 
         return ResponseEntity.ok(productResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable String id) {
         productService.delete(id);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponse> findById(@PathVariable UUID id) {
+    public ResponseEntity<ProductResponse> findById(@PathVariable String id) {
         ProductResponse product = productService.findById(id);
 
         return ResponseEntity.ok(product);
