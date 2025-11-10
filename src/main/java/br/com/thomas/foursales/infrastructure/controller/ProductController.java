@@ -3,6 +3,7 @@ package br.com.thomas.foursales.infrastructure.controller;
 import br.com.thomas.foursales.domain.request.ProductRequest;
 import br.com.thomas.foursales.domain.response.ProductResponse;
 import br.com.thomas.foursales.infrastructure.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-
 @Slf4j
 @RestController
 @RequestMapping("/products")
@@ -26,7 +25,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    //TODO: pq validation notnull n ta funcionando
     @PostMapping("/")
     public ResponseEntity<ProductResponse> create(@RequestBody @Valid ProductRequest request) {
         log.info("metódo=create - requisição para criar produto {} com valor {}", request.getName(), request.getPrice());

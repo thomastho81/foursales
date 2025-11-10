@@ -1,5 +1,6 @@
 package br.com.thomas.foursales.application.service;
 
+import br.com.thomas.foursales.application.payment.PaymentGatewayService;
 import br.com.thomas.foursales.domain.entity.OrderEntity;
 import br.com.thomas.foursales.domain.entity.OrderItemEntity;
 import br.com.thomas.foursales.domain.entity.ProductEntity;
@@ -7,9 +8,11 @@ import br.com.thomas.foursales.domain.entity.UserEntity;
 import br.com.thomas.foursales.domain.enums.OrderStatusEnum;
 import br.com.thomas.foursales.domain.repository.OrderRepository;
 import br.com.thomas.foursales.domain.request.OrderRequest;
+import br.com.thomas.foursales.domain.request.PaymentRequest;
 import br.com.thomas.foursales.domain.response.OrderResponse;
 import br.com.thomas.foursales.infrastructure.exception.OrderUnavailableException;
 import br.com.thomas.foursales.infrastructure.exception.OutOfStockException;
+import br.com.thomas.foursales.infrastructure.exception.PaymentException;
 import br.com.thomas.foursales.infrastructure.exception.ResourceNotFoundException;
 import br.com.thomas.foursales.infrastructure.mapper.OrderConverter;
 import br.com.thomas.foursales.infrastructure.service.OrderService;
@@ -38,9 +41,13 @@ public class OrderServiceImpl implements OrderService {
     private final ProductService productService;
 
     private final OrderConverter orderConverter;
+
+    private final PaymentGatewayService paymentGatewayService;
+
     private static final String OUT_OF_STOCK = "Estoque insuficiente para o produto %s";
     private static final String ORDER_UNAVAILABLE = "Não foi possível realizar o pagamento pois o pedido está em %s";
     private static final String ORDER_CANCELED = "Pedido cancelado: produto %s sem estoque suficiente";
+    private static final String PAYMENT_FAILED = "Pagamento falhou para o usuário %s";
 
     @Override
     @Transactional
@@ -87,8 +94,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponse> findOrdersByUser(String username) {
         UserEntity userEntity = userService.findByUsername(username);
-//TODO: preciso fazer esse find do user? na OrderEntity ja tem o user
-        //o user ja vai estar autenticado e se nao encontrar nada, devolve 204.
         List<OrderEntity> orders = orderRepository.findByUser(userEntity);
 
         return orders.stream()
@@ -98,7 +103,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse payment(Long id) {
-        //TODO: preciso receber o User?se sim, busco o pedido pelo user tbm?
         OrderEntity orderEntity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("pedido"));
         if (!OrderStatusEnum.PENDENTE.equals(orderEntity.getStatus())) throw new OrderUnavailableException(String.format(ORDER_UNAVAILABLE, orderEntity.getStatus().getStatus()));
@@ -118,7 +122,6 @@ public class OrderServiceImpl implements OrderService {
 
         orderEntity.setStatus(OrderStatusEnum.PAGO);
         orderEntity.setUpdatedAt(LocalDateTime.now());
-        //TODO: fazer mock de pagamento
 
         List<ProductEntity> productsToUpdate = orderEntity.getItems().stream()
                 .map(item -> {
@@ -129,6 +132,9 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .toList();
         productService.saveAll(productsToUpdate);
+
+        boolean isPaymentSuccess = paymentGatewayService.mockPayment(new PaymentRequest(orderEntity.getUser().getEmail()));
+        if (!isPaymentSuccess) throw new PaymentException(String.format(PAYMENT_FAILED, orderEntity.getUser().getId()));
 
         return orderConverter.toResponse(orderRepository.save(orderEntity));
     }

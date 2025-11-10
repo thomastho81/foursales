@@ -3,6 +3,7 @@ package br.com.thomas.foursales.infrastructure.controller;
 import br.com.thomas.foursales.domain.request.OrderRequest;
 import br.com.thomas.foursales.domain.response.OrderResponse;
 import br.com.thomas.foursales.infrastructure.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 
