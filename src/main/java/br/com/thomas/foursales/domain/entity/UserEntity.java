@@ -26,8 +26,8 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username")
-    private String username; //todo: colocar constraint unique
+    @Column(name = "username", unique = true)
+    private String username;
 
     @Column(name = "senha")
     private String password;

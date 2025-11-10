@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductRequest {
-
+//TODO: transformar em record
     @NotNull
     @NotBlank
     private String name;
