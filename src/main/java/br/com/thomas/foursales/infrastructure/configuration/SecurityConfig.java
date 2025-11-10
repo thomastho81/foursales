@@ -28,16 +28,12 @@ import java.security.interfaces.RSAPublicKey;
 
 @Configuration
 @EnableWebSecurity
-//@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${chave.pub}")
+    @Value("${key.pub}")
     private RSAPublicKey key;
-    @Value("${chave.privada}")
+    @Value("${key.private}")
     private RSAPrivateKey priv;
 
     @Bean
