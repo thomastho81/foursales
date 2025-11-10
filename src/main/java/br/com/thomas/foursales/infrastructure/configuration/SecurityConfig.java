@@ -1,5 +1,6 @@
 package br.com.thomas.foursales.infrastructure.configuration;
 
+import br.com.thomas.foursales.infrastructure.security.JwtAuthenticationConverter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -36,6 +37,8 @@ public class SecurityConfig {
     @Value("${key.private}")
     private RSAPrivateKey priv;
 
+    private final JwtAuthenticationConverter jwtAuthenticationConverter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -53,7 +56,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(Customizer.withDefaults())
-                .oauth2ResourceServer(conf -> conf.jwt(Customizer.withDefaults()));
+                .oauth2ResourceServer(conf -> conf.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
 
         return http.build();
     }
