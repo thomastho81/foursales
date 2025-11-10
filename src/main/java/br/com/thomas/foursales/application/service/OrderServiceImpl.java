@@ -8,6 +8,7 @@ import br.com.thomas.foursales.domain.enums.OrderStatusEnum;
 import br.com.thomas.foursales.domain.repository.OrderRepository;
 import br.com.thomas.foursales.domain.request.OrderRequest;
 import br.com.thomas.foursales.domain.response.OrderResponse;
+import br.com.thomas.foursales.infrastructure.exception.OrderUnavailableException;
 import br.com.thomas.foursales.infrastructure.exception.OutOfStockException;
 import br.com.thomas.foursales.infrastructure.exception.ResourceNotFoundException;
 import br.com.thomas.foursales.infrastructure.mapper.OrderConverter;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +39,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderConverter orderConverter;
     private static final String OUT_OF_STOCK = "Estoque insuficiente para o produto %s";
-
+    private static final String ORDER_UNAVAILABLE = "Não foi possível realizar o pagamento pois o pedido está em %s";
     private static final String ORDER_CANCELED = "Pedido cancelado: produto %s sem estoque suficiente";
 
     @Override
@@ -98,6 +101,7 @@ public class OrderServiceImpl implements OrderService {
         //TODO: preciso receber o User?se sim, busco o pedido pelo user tbm?
         OrderEntity orderEntity = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("pedido"));
+        if (!OrderStatusEnum.PENDENTE.equals(orderEntity.getStatus())) throw new OrderUnavailableException(String.format(ORDER_UNAVAILABLE, orderEntity.getStatus().getStatus()));
 
         orderEntity.getItems().forEach(item -> {
             ProductEntity product = item.getProduct();
@@ -127,5 +131,16 @@ public class OrderServiceImpl implements OrderService {
         productService.saveAll(productsToUpdate);
 
         return orderConverter.toResponse(orderRepository.save(orderEntity));
+    }
+
+    @Override
+    public BigDecimal findRevenueByDate(Integer month, Integer year, String orderStatus) {
+        LocalDate now = LocalDate.now();
+        month = Objects.isNull(month) ? now.getMonthValue() : month;
+        year = Objects.isNull(year) ? now.getYear() : year;
+
+        OrderStatusEnum orderStatusEnum = OrderStatusEnum.getFromStatus(orderStatus);
+
+        return orderRepository.findRevenueByDate(year, month, orderStatusEnum);
     }
 }

@@ -25,7 +25,7 @@ import java.util.UUID;
 public class ProductEntity {
 
     @Id
-    @Column(name = "id", columnDefinition = "CHAR(36)")
+    @Column(name = "id", columnDefinition = "VARCHAR(36)")
     private String id;
 
     @Column(name = "nome")

@@ -6,11 +6,11 @@ DROP TABLE IF EXISTS tb_usuario;
 -- Tabela de Produtos
 CREATE TABLE IF NOT EXISTS tb_produto (
     id VARCHAR(36) NOT NULL COMMENT 'Identificador único (UUID) do produto',
-    nome VARCHAR(255) COMMENT 'Nome do produto',
+    nome VARCHAR(255) NOT NULL COMMENT 'Nome do produto',
     descricao VARCHAR(255) COMMENT 'Descrição detalhada do produto',
-    preco DECIMAL(10,2) COMMENT 'Preço unitário do produto',
+    preco DECIMAL(10,2) NOT NULL COMMENT 'Preço unitário do produto',
     categoria VARCHAR(255) COMMENT 'Categoria do produto (ex: Eletrônicos, Roupas, etc.)',
-    qt_estoque INT COMMENT 'Quantidade disponível em estoque',
+    qt_estoque INT NOT NULL COMMENT 'Quantidade disponível em estoque',
     dt_criacao DATETIME COMMENT 'Data de criação do registro',
     dt_atualizacao DATETIME COMMENT 'Data da última atualização do registro',
     PRIMARY KEY (id)
@@ -19,11 +19,12 @@ CREATE TABLE IF NOT EXISTS tb_produto (
 -- Tabela de Usuários
 CREATE TABLE IF NOT EXISTS tb_usuario (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador sequencial único do usuário',
-    username VARCHAR(255) COMMENT 'Nome de usuário utilizado para login',
-    senha VARCHAR(255) COMMENT 'Senha criptografada para autenticação',
-    email VARCHAR(255) COMMENT 'Endereço de e-mail do usuário',
+    username VARCHAR(255) NOT NULL COMMENT 'Nome de usuário utilizado para login',
+    senha VARCHAR(255) NOT NULL COMMENT 'Senha criptografada para autenticação',
+    email VARCHAR(255) NOT NULL COMMENT 'Endereço de e-mail do usuário',
     role VARCHAR(50) COMMENT 'Papel do usuário no sistema (ex: ADMIN, CLIENTE)',
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uk_tb_usuario_01 UNIQUE (username)
 ) COMMENT='Tabela que armazena as credenciais e perfis de acesso dos usuários.';
 
 -- Tabela de Pedidos
@@ -51,5 +52,8 @@ CREATE TABLE IF NOT EXISTS tb_item_pedido (
         REFERENCES tb_pedido (id),
     CONSTRAINT fk_tb_item_pedido_02 FOREIGN KEY (id_produto)
         REFERENCES tb_produto (id),
-    UNIQUE (id_pedido, id_produto)
+    CONSTRAINT uk_tb_item_pedido_01 UNIQUE (id_pedido, id_produto)
 ) COMMENT='Tabela que armazena os itens pertencentes a cada pedido.';
+
+-- Index tb_pedido
+CREATE INDEX idx_tb_pedido_usuario_status on tb_pedido (id_usuario, status);
